@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Typing Speed Test</title>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+
+body{
+background:#f4f6f8;
+font-family:Arial;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.container{
+width:700px;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+}
+
+.stats{
+display:flex;
+justify-content:space-between;
+margin:20px 0;
+font-size:18px;
+}
+
+.words{
+background:#eee;
+padding:20px;
+border-radius:5px;
+margin-bottom:20px;
+line-height:1.8;
+}
+
+textarea{
+width:100%;
+height:120px;
+padding:10px;
+font-size:16px;
+border:1px solid #ccc;
+border-radius:5px;
+margin-bottom:20px;
+}
+
+button{
+background:#f4c430;
+border:none;
+padding:12px 25px;
+font-size:16px;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#e0b420;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+const wordList = [
+"time","people","year","way","day","man","thing","woman","life","child",
+"world","school","state","family","student","group","country","problem",
+"hand","part","place","case","week","company","system","program",
+"question","work","government","number","night","point","home",
+"water","room","mother","area","money","story","fact","month"
+];
+
+function TypingTest(){
+
+const [time,setTime] = React.useState(60);
+const [text,setText] = React.useState("");
+const [words,setWords] = React.useState([]);
+const [running,setRunning] = React.useState(false);
+const [wpm,setWpm] = React.useState(0);
+const [accuracy,setAccuracy] = React.useState(0);
+
+React.useEffect(()=>{
+generateWords();
+},[])
+
+React.useEffect(()=>{
+
+let timer;
+
+if(running && time>0){
+timer=setInterval(()=>{
+setTime(t=>t-1);
+},1000)
+}
+
+if(time===0){
+setRunning(false);
+calculateResult();
+}
+
+return ()=>clearInterval(timer)
+
+},[running,time])
+
+function generateWords(){
+
+let arr=[];
+
+for(let i=0;i<50;i++){
+arr.push(wordList[Math.floor(Math.random()*wordList.length)])
+}
+
+setWords(arr)
+
+}
+
+function startTest(){
+
+setRunning(true)
+setText("")
+setTime(60)
+setWpm(0)
+setAccuracy(0)
+generateWords()
+
+}
+
+function calculateResult(){
+
+let typedWords=text.trim().split(" ")
+let correct=0
+
+typedWords.forEach((word,index)=>{
+if(word===words[index]){
+correct++
+}
+})
+
+let wpmValue=typedWords.length
+let acc=(correct/typedWords.length)*100 || 0
+
+setWpm(wpmValue)
+setAccuracy(acc.toFixed(2))
+
+}
+
+return(
+
+<div className="container">
+
+<h1>Typing Speed Test</h1>
+
+<div className="stats">
+<div>Time: {time}s</div>
+<div>WPM: {wpm}</div>
+<div>Accuracy: {accuracy}%</div>
+</div>
+
+<div className="words">
+{words.join(" ")}
+</div>
+
+<textarea
+placeholder="Start typing..."
+value={text}
+disabled={!running}
+onChange={(e)=>setText(e.target.value)}
+/>
+
+<br/>
+
+<button onClick={startTest}>
+Start Typing
+</button>
+
+</div>
+
+)
+
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"))
+root.render(<TypingTest/>)
+
+</script>
+
+</body>
+</html>
